@@ -1,1 +1,10 @@
-node_modules
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+.env
+.env*.local
+.DS_Store
+npm-debug.*
+yarn-error.*
