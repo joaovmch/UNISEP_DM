@@ -1,15 +1,17 @@
-import express from "express";
+import express, { response } from "express";
 import knex from "knex";
+import cors from "cors";
 
 const mysql = knex({
     client: "mysql2",
     connection: {
         host: "localhost",
-        user:"root",
-        password: "123456",
+        user: "root",
+        password: "",
         database: "mercado"
     }
 });
+
 async function testaConexaoComBancoDeDados() {
     try {
         await mysql.raw("SELECT 0 AS RESULT");
@@ -23,27 +25,31 @@ testaConexaoComBancoDeDados();
 
 const app = new express();
 
-app.use(express.json()); //cerealisação
+app.use(express.json());
+app.use(cors());
 
-app.get("/listar", async(req, res)=>{
+app.get("/listar", async (req, res) => {
 
     const produtos = await mysql.select("*").from("produto");
 
     res.send(produtos);
+
 });
 
-app.get("/listar/:id", async(req, res)=>{
+app.get("/listar/:id", async (req, res) => {
 
     const { id } = req.params;
 
     const produto = await mysql.select("*")
-    .from("produto")
-    .where({id: id});
+        .from('produto')
+        .where({ id });
 
-    res.send(produto)
+    res.send(produto);
+
 });
 
 app.post("/cadastrar", async (req, res) => {
+
     const { nome, preco, qtd_estoque } = req.body;
 
     const produto = await mysql.insert({
@@ -52,13 +58,14 @@ app.post("/cadastrar", async (req, res) => {
         qtd_estoque
     }).into("produto");
 
-    res.send(`Produto cadastrado: ${nome}`);
+    res.send({ msg: `Produto ${nome} cadastrado com sucesso` });
 });
 
 app.put("/atualizar", async (req, res) => {
+
     const { id, nome, preco, qtd_estoque } = req.body;
 
-    const produtoAtualizado = await mysql("produto")
+    const produtoAtualizado = await mysql('produto')
         .where({ id })
         .update({
             nome,
@@ -70,14 +77,15 @@ app.put("/atualizar", async (req, res) => {
         const produto = await mysql.select("*")
             .from("produto")
             .where({ id });
-
         res.send(produto);
     } else {
-        res.send({ msg: "Não foi possível atualizar o produto!" });
+        res.send({ msg: "Não foi possivel atualizar o produto!" });
     }
+
 });
-   
+
+
 
 app.listen(8080, () => {
-    console.log("O servidor está rodanddo na porta 8080");
+    console.log("O servidor está rodando na porta 8080");
 });
